@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>मंडी एवं मौसम रेट प्रेडिक्टर</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f7f6; padding: 20px; text-align: center; }
+        .card { background: white; padding: 20px; border-radius: 12px; max-width: 400px; margin: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        select, button { width: 100%; padding: 12px; margin-top: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 16px; }
+        button { background: #28a745; color: white; border: none; font-weight: bold; cursor: pointer; }
+        .result { margin-top: 20px; padding: 15px; border-radius: 8px; text-align: left; }
+        .UP { background: #ffe6e6; color: #d9534f; border: 1px solid #d9534f; }
+        .DOWN { background: #e6ffe6; color: #5cb85c; border: 1px solid #5cb85c; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>🏪 किराना रेट अलर्ट (15 दिन एडवांस)</h2>
+    <label>सामान चुनें:</label>
+    <select id="itemSelect">
+        <option value="चना दाल">चना दाल</option>
+        <option value="अरहर दाल">अरहर दाल</option>
+        <option value="सरसों तेल">सरसों तेल</option>
+        <option value="गेहूं/आटा">गेहूं / आटा</option>
+        <option value="चीनी">चीनी</option>
+    </select>
+    
+    <button onclick="getPrediction()">15 दिन बाद का रेट चेक करें</button>
+
+    <div id="output" class="result" style="display:none;"></div>
+</div>
+
+<script>
+async function getPrediction() {
+    const item = document.getElementById('itemSelect').value;
+    const output = document.getElementById('output');
+    output.style.display = 'block';
+    output.innerHTML = 'मौसम और मंडी का डेटा एनालाइज हो रहा है...';
+
+    const res = await fetch('/api/predict', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ item: item })
+    });
+    
+    const data = await res.json();
+    
+    let trendText = data.trend === 'UP' ? '📈 रेट बढ़ेगा' : '📉 रेट घटेगा';
+    output.className = 'result ' + data.trend;
+    output.innerHTML = `
+        <h3>${data.item} - 15 दिन बाद का अलर्ट</h3>
+        <p><b>अनुमान:</b> ${trendText} (${Math.abs(data.change_percent)}%)</p>
+        <p><b>कारण:</b> ${data.reason}</p>
+    `;
+}
+</script>
+
+</body>
+</html>

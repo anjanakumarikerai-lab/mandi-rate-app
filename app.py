@@ -15,21 +15,50 @@ def get_weather_forecast(lat=25.6, lon=85.1):
 def predict_price_trend(item, rain_mm):
     trend = "STABLE"
     change_percent = 0
-    reason = "सामान्य आपूर्ति और अनुकूल मौसम।"
+    reason = "सामान्य आपूर्ति और स्थिर मांग।"
 
-    if rain_mm > 50:
-        trend = "UP"
-        change_percent = 8
-        reason = "अगले 15 दिनों में भारी बारिश से आपूर्ति प्रभावित होने की आशंका है।"
-    elif rain_mm < 5:
-        if item in ["चना दाल", "अरहर दाल", "मसूर दाल"]:
+    # पैक्ड और एफएमसीजी सामान (बिस्कुट, नमकीन, साबुन)
+    if item in ["बिस्कुट", "नमकीन", "साबुन/डिटर्जेंट"]:
+        trend = "STABLE"
+        change_percent = 0
+        reason = "ब्रांडेड पैक्ड सामानों के दाम कंपनियों द्वारा तय होते हैं, मौसम या मंडी से तुरंत बदलाव नहीं होता।"
+
+    # चायपत्ती और मसाले
+    elif item in ["चायपत्ती", "मसाले (हल्दी/मिर्च)"]:
+        if rain_mm > 60:
+            trend = "UP"
+            change_percent = 4
+            reason = "अत्यधिक बारिश से परिवहन व सुखाने की प्रक्रिया प्रभावित होने के कारण हल्की तेजी आ सकती है।"
+        else:
+            trend = "STABLE"
+            change_percent = 0
+            reason = "मसाले व चायपत्ती की आवक और मांग सामान्य बनी हुई है।"
+
+    # दालें और तेल
+    elif item in ["चना दाल", "अरहर दाल", "मसूर दाल", "सरसों तेल", "रिफाइंड तेल"]:
+        if rain_mm > 50:
+            trend = "UP"
+            change_percent = 7
+            reason = "भारी बारिश से मंडियों में आवक घटने और कच्चे माल की ढुलाई प्रभावित होने से दाम बढ़ सकते हैं।"
+        elif rain_mm < 5:
+            trend = "UP"
+            change_percent = 4
+            reason = "कम बारिश से मंडी में नई फसल की आवक धीमी रहने से हल्की तेजी का अनुमान है।"
+        else:
+            trend = "DOWN"
+            change_percent = -3
+            reason = "मौसम अनुकूल है और मंडियों में सप्लाई बेहतर होने से रेट में हल्की नरमी आ सकती है।"
+
+    # अनाज (गेहूं, चावल, चीनी)
+    else:
+        if rain_mm > 50:
             trend = "UP"
             change_percent = 5
-            reason = "कम बारिश के कारण मंडियों में आवक घटने से दाम बढ़ सकते हैं।"
-    else:
-        trend = "DOWN"
-        change_percent = -3
-        reason = "मौसम अनुकूल है और नई आवक से रेट में हल्की गिरावट आ सकती है।"
+            reason = "बारिश के कारण भंडारण और गोदामों से सप्लाई धीमी पड़ने की आशंका है।"
+        else:
+            trend = "STABLE"
+            change_percent = 0
+            reason = "सरकारी स्टॉक और मंडी आवक के संतुलन से रेट स्थिर बने रहेंगे।"
 
     return {
         "item": item,
@@ -53,4 +82,3 @@ def predict():
 
 if __name__ == '__main__':
     app.run(debug=True)
-  
